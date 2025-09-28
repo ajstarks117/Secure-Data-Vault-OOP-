@@ -17,7 +17,7 @@ int main() {
         cout << "\n=== Secure Data Vault ===\n";
         cout << "1. Encrypt & Save Text\n";
         cout << "2. View Decrypted Text\n";
-        cout << "3. Upload to Cloud\n";
+        cout << "3. View Encrypted Text\n";
         cout << "4. Exit\n";
         cout << "Choice: ";
         cin >> choice;
