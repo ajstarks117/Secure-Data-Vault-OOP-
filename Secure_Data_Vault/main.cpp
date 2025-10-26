@@ -1,57 +1,168 @@
 #include <iostream>
+#include <fstream>
+#include <string>
 #include "Encryption.hpp"
 #include "Storage.hpp"
 #include "Network.hpp"
+
 using namespace std;
+
+// Helper: get AES mode from user
+Encryption::AESMode selectMode() {
+    int choice;
+    cout << "\nSelect AES Mode:\n";
+    cout << "1. AES-128\n";
+    cout << "2. AES-192\n";
+    cout << "3. AES-256\n";
+    cout << "Choice: ";
+    cin >> choice;
+    cin.ignore();
+    switch (choice) {
+        case 1: return Encryption::AES_128;
+        case 2: return Encryption::AES_192;
+        default: return Encryption::AES_256;
+    }
+}
 
 int main() {
     Encryption enc;
     Storage storage;
     Network net;
 
-    const string filename = "encrypted.txt";
+    string filename = "encrypted.bin";
     char choice;
-    char key = 'K'; // simple XOR key for demo
 
-    while(true) {
+    while (true) {
         cout << "\n=== Secure Data Vault ===\n";
         cout << "1. Encrypt & Save Text\n";
         cout << "2. View Decrypted Text\n";
-        cout << "3. Upload to Cloud\n";
-        cout << "4. Exit\n";
+        cout << "3. Upload Encrypted Text (simulated)\n";
+        cout << "4. Encrypt File\n";
+        cout << "5. Decrypt File\n";
+        cout << "6. Exit\n";
         cout << "Choice: ";
         cin >> choice;
         cin.ignore();
 
-        if(choice == '1') {
-            string text;
+        if (choice == '1') {
+            string text, password;
             cout << "Enter text to encrypt: ";
             getline(cin, text);
-            string encrypted = enc.encrypt(text, key);
-            if(storage.saveToFile(encrypted, filename))
-                cout << "Text encrypted and saved locally.\n";
-            else
-                cout << "Failed to save text.\n";
-        }
-        else if(choice == '2') {
-            string encrypted = storage.loadFromFile(filename);
-            if(encrypted.empty())
-                cout << "No data found.\n";
-            else {
-                string decrypted = enc.decrypt(encrypted, key);
-                cout << "Decrypted Text: " << decrypted << "\n";
+            cout << "Enter password: ";
+            getline(cin, password);
+
+            Encryption::AESMode mode = selectMode();
+            string encrypted = enc.encrypt(text, password, mode);
+            if (encrypted.empty()) {
+                cout << "❌ Encryption failed.\n";
+            } else if (storage.saveToFile(encrypted, filename)) {
+                cout << "✅ Text encrypted with AES-"
+                     << (mode == Encryption::AES_128 ? "128" :
+                         mode == Encryption::AES_192 ? "192" : "256")
+                     << " and saved to " << filename << "\n";
+            } else {
+                cout << "❌ Failed to save.\n";
             }
         }
-        else if(choice == '3') {
+
+        else if (choice == '2') {
+            string password;
+            cout << "Enter password to decrypt: ";
+            getline(cin, password);
+
             string encrypted = storage.loadFromFile(filename);
-            if(encrypted.empty())
-                cout << "No data to upload.\n";
-            else
-                net.uploadToCloud(encrypted);
+            if (encrypted.empty()) {
+                cout << "❌ No data found.\n";
+                continue;
+            }
+            string decrypted = enc.decrypt(encrypted, password, Encryption::AES_256);
+            if (decrypted.empty()) {
+                cout << "❌ Wrong password or corrupted data.\n";
+            } else {
+                cout << "✅ Decrypted Text:\n" << decrypted << "\n";
+            }
         }
-        else if(choice == '4') {
+
+        else if (choice == '3') {
+            string encrypted = storage.loadFromFile(filename);
+            if (encrypted.empty()) {
+                cout << "❌ No data to upload.\n";
+                continue;
+            }
+            if (net.uploadToCloud(encrypted))
+                cout << "✅ Encrypted data uploaded (simulated).\n";
+            else
+                cout << "❌ Upload failed.\n";
+        }
+
+        else if (choice == '4') {
+            string filepath, password;
+            cout << "Enter file path to encrypt: ";
+            getline(cin, filepath);
+            cout << "Enter password: ";
+            getline(cin, password);
+            Encryption::AESMode mode = selectMode();
+
+            ifstream in(filepath, ios::binary);
+            if (!in) {
+                cout << "❌ Could not open file.\n";
+                continue;
+            }
+
+            string fileData((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
+            in.close();
+
+            string encrypted = enc.encrypt(fileData, password, mode);
+            if (encrypted.empty()) {
+                cout << "❌ File encryption failed.\n";
+                continue;
+            }
+
+            string outFile = filepath + ".enc";
+            if (storage.saveToFile(encrypted, outFile)) {
+                cout << "✅ File encrypted and saved as: " << outFile << "\n";
+            } else {
+                cout << "❌ Failed to save encrypted file.\n";
+            }
+        }
+
+        else if (choice == '5') {
+            string filepath, password;
+            cout << "Enter encrypted file path (.enc): ";
+            getline(cin, filepath);
+            cout << "Enter password: ";
+            getline(cin, password);
+
+            string encrypted = storage.loadFromFile(filepath);
+            if (encrypted.empty()) {
+                cout << "❌ Could not read encrypted file.\n";
+                continue;
+            }
+
+            string decrypted = enc.decrypt(encrypted, password, Encryption::AES_256);
+            if (decrypted.empty()) {
+                cout << "❌ Wrong password or corrupted file.\n";
+                continue;
+            }
+
+            // output file name: remove .enc and append _decrypted
+            string outFile = filepath;
+            if (outFile.size() > 4 && outFile.substr(outFile.size() - 4) == ".enc")
+                outFile = outFile.substr(0, outFile.size() - 4);
+            outFile += "_decrypted";
+
+            if (storage.saveToFile(decrypted, outFile)) {
+                cout << "✅ File decrypted and saved as: " << outFile << "\n";
+            } else {
+                cout << "❌ Failed to save decrypted file.\n";
+            }
+        }
+
+        else if (choice == '6') {
+            cout << "Goodbye!\n";
             break;
         }
+
         else {
             cout << "Invalid choice.\n";
         }

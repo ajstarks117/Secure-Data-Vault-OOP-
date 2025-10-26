@@ -2,13 +2,19 @@
 #define ENCRYPTION_HPP
 
 #include <string>
-using namespace std;
 
 class Encryption {
 public:
-    Encryption() {}
-    string encrypt(const string& plainText, char key);
-    string decrypt(const string& cipherText, char key);
+    enum AESMode {
+        AES_128,
+        AES_192,
+        AES_256
+    };
+
+    Encryption() = default;
+
+    std::string encrypt(const std::string& plainText, const std::string& password, AESMode mode);
+    std::string decrypt(const std::string& encryptedBlob, const std::string& password, AESMode mode);
 };
 
 #endif
