@@ -11,10 +11,10 @@ public:
         AES_256
     };
 
-    Encryption() = default;
+    //Encryption() = default;
 
     std::string encrypt(const std::string& plainText, const std::string& password, AESMode mode);
-    std::string decrypt(const std::string& encryptedBlob, const std::string& password, AESMode mode);
+    std::string decrypt(const std::string& blob, const std::string& password);
 };
 
 #endif

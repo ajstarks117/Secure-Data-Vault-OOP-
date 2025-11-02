@@ -1,11 +1,8 @@
 #include "Network.hpp"
 #include <iostream>
-using namespace std;
 
-bool Network::uploadToCloud(const string& encryptedText) {
-    // ✅ Just show encrypted text in terminal
-    cout << "Encrypted text: " << encryptedText << endl;
-
-    // Since no actual upload is done, just return true
+bool Network::uploadToCloud(const std::string& encryptedText) {
+    std::cout << "[Simulated upload] Encrypted data length: "
+              << encryptedText.size() << " bytes\n";
     return true;
 }
