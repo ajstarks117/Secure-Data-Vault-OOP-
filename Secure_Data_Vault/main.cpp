@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include<limits>
 #include "Encryption.hpp"
 #include "Storage.hpp"
 #include "Network.hpp"
@@ -16,7 +17,7 @@ Encryption::AESMode selectMode() {
     cout << "3. AES-256\n";
     cout << "Choice: ";
     cin >> choice;
-    cin.ignore();
+    cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     switch (choice) {
         case 1: return Encryption::AES_128;
         case 2: return Encryption::AES_192;
@@ -75,7 +76,7 @@ int main() {
                 cout << "❌ No data found.\n";
                 continue;
             }
-            string decrypted = enc.decrypt(encrypted, password, Encryption::AES_256);
+            string decrypted = enc.decrypt(encrypted, password);
             if (decrypted.empty()) {
                 cout << "❌ Wrong password or corrupted data.\n";
             } else {
@@ -139,7 +140,7 @@ int main() {
                 continue;
             }
 
-            string decrypted = enc.decrypt(encrypted, password, Encryption::AES_256);
+            string decrypted = enc.decrypt(encrypted, password);
             if (decrypted.empty()) {
                 cout << "❌ Wrong password or corrupted file.\n";
                 continue;
