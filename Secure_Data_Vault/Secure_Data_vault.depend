@@ -1,10 +1,12 @@
 # depslib dependency file v1.0
-1761377292 source:c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\encryption.cpp
+1761526086 source:c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\encryption.cpp
 	"Encryption.hpp"
 	<openssl/evp.h>
 	<openssl/rand.h>
 	<openssl/sha.h>
 	<openssl/err.h>
+	<openssl/bio.h>
+	<openssl/buffer.h>
 	<vector>
 	<cstring>
 	<iostream>
@@ -12,9 +14,14 @@
 1761377273 c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\encryption.hpp
 	<string>
 
-1760281306 source:c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\main.cpp
+1764253213 source:c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\main.cpp
 	<iostream>
-	<openssl/evp.h>
+	<fstream>
+	<string>
+	<chrono>
+	"Encryption.hpp"
+	"Storage.hpp"
+	"Network.hpp"
 
 1759070118 c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\storage.hpp
 	<string>
@@ -22,7 +29,7 @@
 1759088192 c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\network.hpp
 	<string>
 
-1759088204 source:c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\network.cpp
+1761525941 source:c:\users\asus\documents\github\secure-data-vault-oop-\secure_data_vault\network.cpp
 	"Network.hpp"
 	<iostream>
 
@@ -417,4 +424,17 @@
 	<openssl/e_os2.h>
 	<openssl/bio.h>
 	<stdio.h>
+
+1759210426 c:\program files (x86)\openssl-win32\include\openssl\buffer.h
+	<openssl/macros.h>
+	<openssl/types.h>
+	<openssl/crypto.h>
+	<openssl/buffererr.h>
+	<stddef.h>
+	<sys/types.h>
+
+1759210426 c:\program files (x86)\openssl-win32\include\openssl\buffererr.h
+	<openssl/opensslconf.h>
+	<openssl/symhacks.h>
+	<openssl/cryptoerr_legacy.h>
 

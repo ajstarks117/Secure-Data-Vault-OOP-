@@ -3,9 +3,7 @@
 using namespace std;
 
 bool Network::uploadToCloud(const string& encryptedText) {
-    // ✅ Just show encrypted text in terminal
-    cout << "Encrypted text: " << encryptedText << endl;
-
-    // Since no actual upload is done, just return true
+    cout << "\n[Encrypted Data - Base64 Encoded]\n";
+    cout << encryptedText << "\n";
     return true;
 }

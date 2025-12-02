@@ -3,6 +3,8 @@
 #include <openssl/rand.h>
 #include <openssl/sha.h>
 #include <openssl/err.h>
+#include <openssl/bio.h>
+#include <openssl/buffer.h>
 
 #include <vector>
 #include <cstring>
@@ -40,6 +42,45 @@ namespace {
         }
     }
 }
+
+
+
+// ---------- Base64 Helper Functions ----------
+std::string base64Encode(const unsigned char* buffer, size_t length) {
+    BIO *bio, *b64;
+    BUF_MEM *bufferPtr;
+
+    b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // No newlines
+    bio = BIO_new(BIO_s_mem());
+    bio = BIO_push(b64, bio);
+
+    BIO_write(bio, buffer, (int)length);
+    BIO_flush(bio);
+    BIO_get_mem_ptr(bio, &bufferPtr);
+
+    std::string encoded(bufferPtr->data, bufferPtr->length);
+    BIO_free_all(bio);
+
+    return encoded;
+}
+
+std::string base64Decode(const std::string& encoded) {
+    BIO *bio, *b64;
+    int decodeLen = (int)((encoded.size() * 3) / 4);
+    std::vector<unsigned char> buffer(decodeLen);
+
+    b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    bio = BIO_new_mem_buf(encoded.data(), (int)encoded.size());
+    bio = BIO_push(b64, bio);
+
+    int len = BIO_read(bio, buffer.data(), (int)buffer.size());
+    BIO_free_all(bio);
+
+    return std::string((char*)buffer.data(), len);
+}
+
 
 std::string Encryption::encrypt(const std::string& plainText, const std::string& password, AESMode mode) {
     if (password.empty()) return {};
@@ -96,10 +137,16 @@ std::string Encryption::encrypt(const std::string& plainText, const std::string&
     memcpy(&out[1 + SALT_LEN], iv, IV_LEN);
     memcpy(&out[1 + SALT_LEN + IV_LEN], ciphertext.data(), total);
 
-    return out;
+    return base64Encode(reinterpret_cast<const unsigned char*>(out.data()), out.size());
+
 }
 
-std::string Encryption::decrypt(const std::string& blob, const std::string& password, AESMode /*modeParam*/) {
+std::string Encryption::decrypt(const std::string& encryptedBlobBase64, const std::string& password, AESMode /*modeParam*/) {
+    if (password.empty()) return {};
+
+    // Decode Base64 input to binary before decryption
+    std::string blob = base64Decode(encryptedBlobBase64);
+
     if (blob.size() < 1 + SALT_LEN + IV_LEN) return {};
 
     AESMode mode = static_cast<AESMode>(blob[0]);
